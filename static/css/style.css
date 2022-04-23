@@ -1,0 +1,58 @@
+ .main-frame {
+    margin: 60px 0px 60px 0px;
+    background: #daa520;
+    border-radius: 300px;
+    height: 300px;
+}
+
+.article-title {
+    font-size: 40px;
+    margin: 10px 0px 10px 0px;
+}
+
+.article-capital {
+    color: #808080;
+    font-size: 25px;
+}
+
+a {
+    text-decoration: none;
+    color: #595959;
+}
+
+a:hover {
+    text-decoration: none;
+    color: #595959;
+}
+
+.tasks {
+    margin-top: 100px;
+    padding-top: 0px;
+}
+
+.frame-for-tasks {
+    border: 1px solid grey;
+    border-radius: 50px;
+    margin: 0px 45px 0px 45px;
+    height: 280px;
+    width: 400px;
+    background: white;
+}
+
+.left-tasks {
+    float: left;
+}
+
+.right-tasks {
+    text-align: right;
+    float: right;
+}
+
+.search-string {
+    border: 1px solid grey;
+    margin-left: 220px;
+    margin-right: 10px;
+    width: 700px;
+    border-radius: 5px;
+}
+
