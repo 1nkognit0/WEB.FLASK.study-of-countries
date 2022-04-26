@@ -1,0 +1,53 @@
+{% extends "base.html" %}
+
+{% block title %} Log In {% endblock %}
+
+{% block content %}
+
+<form method="post" class="registration-form" action="" novalidate>
+    <h1 class="h2 mb-4 text-center">Sign In</h1>
+    {{ form.hidden_tag() }}
+
+    <div class="form-group">
+        {{ form.username.label }}
+        {{ form.username(class="form-control") }}
+        {% if form.username.errors %}
+            {% for error in form.username.errors %}
+                <div class="alert alert-danger" role="alert">
+                    {{ error }}
+                </div>
+            {% endfor %}
+        {% elif message %}
+            <div class="alert alert-danger" role="alert">
+                {{ message }}
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="form-group">
+        {{ form.password.label }}
+        {{ form.password(class="form-control", type="password") }}
+        {% if form.password.errors %}
+            {% for error in form.password.errors %}
+                <div class="alert alert-danger" role="alert">
+                    {{ error }}
+                </div>
+            {% endfor %}
+        {% elif message %}
+            <div class="alert alert-danger" role="alert">
+                {{ message }}
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="form-group">
+        <div class="custom-control custom-checkbox">
+            {{ form.remember_me(class="custom-control-input") }}
+            {{ form.remember_me.label(class="custom-control-label") }}
+        </div>
+    </div>
+
+    {{ form.submit(type="submit", class="btn btn-warning btn-lg btn-block") }}
+</form>
+
+{% endblock %}
