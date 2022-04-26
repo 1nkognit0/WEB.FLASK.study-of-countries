@@ -1,10 +1,12 @@
 from flask import Flask, render_template, request
+from random import choice, randint
+import os
+
 from data import db_session
 from data.country import Country
+
 from data.form_button import ButtonForm
-from random import choice, randint
 from data.form_search import SearchForm
-import os
 
 app = Flask(__name__)
 
@@ -16,6 +18,8 @@ score_quiz = 0
 win_score_quiz = 0
 progress_on_quiz = ['black' for _ in range(10)]
 progress_on_quiz_copy = progress_on_quiz.copy()
+parts_of_world = ['Все', 'Африка', 'Северная Америка', 'Южная Америка', 'Европа', 'Австралия и Океания', 'Азия']
+select_option = 'Все'
 
 # подключение к базе
 db_session.global_init('db/CountryDB.db')
@@ -35,12 +39,24 @@ def certain_country(name):
     return render_template('country.html', data=country)
 
 
+@app.route('/parts/<string:parts>')
+def parts_country(parts):
+    global score_quiz, win_score_quiz, progress_on_quiz
+    score_quiz = 0
+    win_score_quiz = 0
+    progress_on_quiz = progress_on_quiz_copy.copy()
+
+    countries = session.query(Country).filter(Country.parts_of_world == parts).all()
+    return render_template('part_selection.html', data=countries)
+
+
 @app.route('/', methods=['GET', 'POST'])
 def main_page():
     global score_quiz, win_score_quiz, progress_on_quiz
     score_quiz = 0
     win_score_quiz = 0
     progress_on_quiz = progress_on_quiz_copy.copy()
+
     form = SearchForm()
     if request.method == 'POST':
         post = [name for name in request.form.items()]
@@ -51,13 +67,16 @@ def main_page():
     return render_template('index.html', form=form, data=countries)
 
 
-@app.route('/quizzes')
-def quiz():
-    global score_quiz, win_score_quiz, progress_on_quiz
+@app.route('/quizzes', methods=['GET', 'POST'])
+def quizzes():
+    global score_quiz, win_score_quiz, progress_on_quiz, select_option
     score_quiz = 0
     win_score_quiz = 0
     progress_on_quiz = progress_on_quiz_copy.copy()
-    return render_template('quizzes.html')
+
+    if request.method == 'POST':
+        select_option = [name for name in request.form.items()][0][1]
+    return render_template('quizzes.html', select=select_option, parts=parts_of_world)
 
 
 @app.route('/quizzes/capital', methods=['GET', 'POST'])
@@ -71,7 +90,7 @@ def quiz_capitals():
 
 
 @app.route('/quizzes/flag', methods=['GET', 'POST'])
-def flag_page():
+def quiz_flags():
     info = form_for_quizzes()
     if info[0] == 'run':
         return render_template('quiz-flag.html',
@@ -82,7 +101,11 @@ def flag_page():
 
 def form_for_quizzes():
     form = ButtonForm()
-    countries = session.query(Country).all()
+    global select_option
+    if select_option == 'Все':
+        countries = session.query(Country).all()
+    else:
+        countries = session.query(Country).filter(Country.parts_of_world == select_option).all()
     options = [choice(countries) for _ in range(4)]
 
     form.correct_option.label.text = options[0].name
