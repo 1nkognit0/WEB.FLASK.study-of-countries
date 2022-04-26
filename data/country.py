@@ -14,3 +14,4 @@ class Country(SqlAlchemyBase):
     population = sqlalchemy.Column(sqlalchemy.Integer, nullable=True)
     density = sqlalchemy.Column(sqlalchemy.Float, nullable=True)
     flag = sqlalchemy.Column(sqlalchemy.String, nullable=True)
+    parts_of_world = sqlalchemy.Column(sqlalchemy.String, nullable=True)
