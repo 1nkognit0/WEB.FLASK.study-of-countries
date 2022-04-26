@@ -56,3 +56,6 @@ a:hover {
     border-radius: 5px;
 }
 
+.radio-buttons {
+    display: inline-block;
+}
