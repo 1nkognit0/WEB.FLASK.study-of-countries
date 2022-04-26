@@ -1,6 +1,5 @@
 from flask_wtf import FlaskForm
-from wtforms import SubmitField
-from wtforms.fields.html5 import SearchField
+from wtforms import SubmitField, SearchField
 
 
 class SearchForm(FlaskForm):
