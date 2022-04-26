@@ -91,7 +91,7 @@ def quiz_capitals():
     info = form_for_quizzes()
     if info[0] == 'run':
         return render_template('quiz-capital.html',
-                               form=info[1], correct=info[2][0], buttons=info[3], progress=progress_on_quiz)
+                               form=info[1], correct=info[2], buttons=info[3], progress=progress_on_quiz)
     else:
         return render_template('results.html', win=info[1])
 
@@ -101,29 +101,23 @@ def quiz_flags():
     info = form_for_quizzes()
     if info[0] == 'run':
         return render_template('quiz-flag.html',
-                               form=info[1], correct=info[2][0], buttons=info[3], progress=progress_on_quiz)
+                               form=info[1], correct=info[2], buttons=info[3], progress=progress_on_quiz)
     else:
         return render_template('results.html', win=info[1])
 
 
 def form_for_quizzes():
     form = ButtonForm()
-    global select_option
-    if select_option == 'Все':
-        countries = session.query(Country).all()
-    else:
-        countries = session.query(Country).filter(Country.parts_of_world == select_option).all()
-    print(countries)
-    print(len(countries))
-    options = [choice(countries) for _ in range(4)]
+    global score_quiz, win_score_quiz, progress_on_quiz
 
-    form.correct_option.label.text = options[0].name
-    form.option2.label.text = options[1].name
-    form.option3.label.text = options[2].name
-    form.option4.label.text = options[3].name
+    options, correct = search_options()
+
+    form.correct_option.label.text = correct[score_quiz].name
+    form.option2.label.text = options[score_quiz][0].name
+    form.option3.label.text = options[score_quiz][1].name
+    form.option4.label.text = options[score_quiz][2].name
 
     if request.method == 'POST':
-        global score_quiz, win_score_quiz, progress_on_quiz
         answer = [name for name in request.form]
         if answer[0] == 'correct_option':
             win_score_quiz += 1
@@ -137,10 +131,27 @@ def form_for_quizzes():
             win_score_quiz = 0
             progress_on_quiz = progress_on_quiz_copy.copy()
             return ['end', win]
-    #randint используется, чтобы сделать рандомную последоватльность вывода кнопок
+    # использую randint чтобы сделать рандомную последоватльность вывода кнопок(способа лучше не нашёл)
     buttons = randint(1, 4)
-    return ['run', form, options, buttons]
+    return ['run', form, correct[score_quiz], buttons]
 
+
+# функция для генерации вопросов на викторине
+def search_options():
+    global wrong_options, correct_options, select_option
+    if select_option == 'Все':
+        countries = session.query(Country).all()
+    else:
+        countries = session.query(Country).filter(Country.parts_of_world == select_option).all()
+
+    for count in range(10):
+        correct_options.append(choice(countries))
+        wrong_options.append([])
+        while len(wrong_options[count]) < 3:
+            opt = choice(countries)
+            if opt != correct_options[count]:
+                wrong_options[count].append(opt)
+    return wrong_options, correct_options
 
 @app.route('/reg', methods=['GET', 'POST'])
 def register_page():
