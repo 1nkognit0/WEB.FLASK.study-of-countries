@@ -26,6 +26,24 @@
                     <a class="nav-item nav-link h4" href="/quizzes">Викторины</a>
                 </li>
             </ul>
+            <ul class="navbar-nav font-weight-bold mx-right">
+                {% if current_user.is_authenticated %}
+                <li class="nav-item">
+                    <span class="nav-item nav-link active h4">{{ current_user.login }}</span>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-item nav-link h4" href="{{ url_for('log_out') }}">Выход</a>
+                </li>
+                {% else %}
+                <li class="nav-item">
+                    <a class="nav-item nav-link h4" href="{{ url_for('register_page') }}">Регистрация</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-item nav-link h4" href="{{ url_for('login_page') }}">Вход</a>
+                </li>
+                {% endif %}
+            </ul>
+
         </div>
     </nav>
 </header>
