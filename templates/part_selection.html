@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %} Часть Света: {{ data[0].parts_of_world }} {% endblock %}
+
+{% block content %}
+<body>
+    <center>
+        <h1 class="display-2">{{ data[0].parts_of_world }}</h1>
+    </center>
+        {% for item in data %}
+        <article class="main-frame">
+        <a href="/{{ item.name }}">
+            <center>
+                <p class="article-title">{{ item.name }}</p>
+                <img src={{item.flag}} alt="No image found" width="350" height="175">
+                <p class="article-capital">{{ item.capital }}</p>
+            </center>
+        </a>
+        {% endfor %}
+    </article>
+</body>
+{% endblock %}
