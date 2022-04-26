@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+
+{% block title %} Викторины {% endblock %}
+
+{% block content %}
+
+<p class="display-1" align="center">Проверь себя</p>
+<h3 align="center">(В каждом тесте 10 вопросов)</h3>
+
+<hr color="black" style="margin-top: 40px;">
+<form name="myForm" action="/quizzes" method="post">
+    <div style="margin-bottom: 20px; margin-top: 20px;" align="center">
+        {% for name in parts %}
+            {% if name == select %}
+                <input type="radio" id="{{name}}" name="parts" value="{{name}}" checked>
+                <label for={{name}} class="form-check-label" style="margin-right: 10px;">{{name}}</label>
+            {% endif %}
+            {% if name != select %}
+                <input type="radio" id="{{name}}" name="parts" value="{{name}}">
+                <label for={{name}} class="form-check-label" style="margin-right: 10px;">{{name}}</label>
+            {% endif %}
+        {% endfor %}
+    </div>
+    <div align="center">
+        <input type=submit value='Сохранить изменения' class="btn btn-success">
+    </div>
+</form>
+<hr color="black">
+
+<div class="tasks">
+    <div class="right-tasks">
+        <a href="/quizzes/flag">
+            <article class="frame-for-tasks">
+                <img src="static\img\flag.svg" alt="Not found" width="150px" height="150px" style="margin-right: 110px">
+                <h3 style="margin-right: 125px; margin-top: 20px">по флагам</h3>
+            </article></a>
+    </div>
+    <div class="left-tasks">
+        <a href="/quizzes/capital">
+            <article class="frame-for-tasks">
+                <img src="static\img\capital.svg" alt="Not found" width="200px" height="200px" style="margin-left: 110px">
+                <h3 style="margin-left: 125px; margin-top: 20px">по столицам</h3>
+            </article></a>
+    </div>
+</div>
+
+{% endblock %}

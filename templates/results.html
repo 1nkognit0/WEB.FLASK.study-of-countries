@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %} Столицы {% endblock %}
+
+{% block content %}
+<body>
+    {% if win >= 8 %}
+        <p class="display-2" align="center">Отличный результат</p>
+        <h3 align="center"><font color="green"> Вы ответили правильно на {{ win }} вопросов из 10 </font></h3>
+        <h3 align="center">Молодцы, вы достаточно хорошо разбираетесь в теме</h3>
+    {% endif %}
+
+    {% if win > 4 and win <= 7 %}
+        <p class="display-2" align="center">Неплохой результат</p>
+        <h3 align="center"><font color="yellow"> Вы ответили правильно на {{ win }} вопросов из 10 </font></h3>
+        <h3 align="center">Практически максимальный балл) <br> Можете попробовать еще раз!</h3>
+    {% endif %}
+
+    {% if win <= 4 %}
+        <p class="display-2" align="center">Результат неутешительный</p>
+        <h3 align="center"><font color="red"> Вы ответили правильно на {{ win }} вопросов из 10 </font></h3>
+        <h3 align="center">Возможно, вам просто попались неудачные вопросы. <br> Можете попробовать еще раз!</h3>
+    {% endif %}
+
+    <div align="center">
+        <br>
+        <br>
+        <a href="/quizzes" style="text-decoration: underline; color: blue; font-size: 30px">
+                Вернуться на страницу с викторинами</a>
+    </div>
+</body>
+{% endblock %}
