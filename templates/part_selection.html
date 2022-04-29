@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 
-{% block title %} Часть Света: {{ data[0].parts_of_world }} {% endblock %}
+{% block title %} {{ name }} {% endblock %}
 
 {% block content %}
 <body>
     <center>
-        <h1 class="display-2">{{ data[0].parts_of_world }}</h1>
+        <h1 class="display-2">{{ name }}</h1>
     </center>
         {% for item in data %}
         <article class="main-frame">
