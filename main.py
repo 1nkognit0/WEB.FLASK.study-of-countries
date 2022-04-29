@@ -20,13 +20,18 @@ login_manager.init_app(app)
 # ключ
 app.config['SECRET_KEY'] = 'some_key'
 
-# переменные для викторины(Обнуляются во всех обработчиках, чтобы исключить возможное сохраниние прогресса)
+# переменные нужные для правильной работы викторины
 score_quiz = 0
 win_score_quiz = 0
 progress_on_quiz = ['black' for _ in range(10)]
 progress_on_quiz_copy = progress_on_quiz.copy()
 parts_of_world = ['Все', 'Африка', 'Северная Америка', 'Южная Америка', 'Европа', 'Австралия и Океания', 'Азия']
 select_option = 'Все'
+wrong_options = []
+correct_options = []
+
+form_government = ['Конституционная монархия', 'Парламентская республика', 'Президентская республика',
+                   'Смешанная республика', 'Абсолютная монархия', 'Социалистическая республика', 'Исламская республика']
 
 # подключение к базе
 db_session.global_init('db/CountryDB.db')
@@ -46,15 +51,21 @@ def certain_country(name):
     return render_template('country.html', data=country)
 
 
-@app.route('/parts/<string:parts>')
-def parts_country(parts):
+@app.route('/sorting/<string:sort>')
+def parts_country(sort):
     global score_quiz, win_score_quiz, progress_on_quiz
     score_quiz = 0
     win_score_quiz = 0
     progress_on_quiz = progress_on_quiz_copy.copy()
 
-    countries = session.query(Country).filter(Country.parts_of_world == parts).all()
-    return render_template('part_selection.html', data=countries)
+    if sort in parts_of_world:
+        countries = session.query(Country).filter(Country.parts_of_world == sort).all()
+    elif sort in form_government:
+        countries = session.query(Country).filter(Country.form_government == sort).all()
+    else:
+        countries = session.query(Country).filter(Country.language == sort).all()
+
+    return render_template('part_selection.html', data=countries, name=sort)
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -153,15 +164,16 @@ def search_options():
                 wrong_options[count].append(opt)
     return wrong_options, correct_options
 
+
 @app.route('/reg', methods=['GET', 'POST'])
 def register_page():
     form = RegisterForm()
     if form.validate_on_submit():
         if form.password.data != form.confirm_password.data:
-            return render_template('reg.html', form=form, pas_err='Passwords do not match')
+            return render_template('reg.html', form=form, pas_err='Пароли не совпадают')
 
         if session.query(User).filter(User.login == form.username.data).first():
-            return render_template('reg.html', form=form, user_err='User already exists')
+            return render_template('reg.html', form=form, user_err='Такой пользователь уже существует')
         user = User(login=form.username.data)
         user.set_password(form.password.data)
         session.add(user)
@@ -183,7 +195,7 @@ def login_page():
         if user and user.check_password(form.password.data):
             login_user(user, remember=form.remember_me.data)
             return redirect('/')
-        return render_template('login.html', message='Incorrect login or password', form=form)
+        return render_template('login.html', message='Неверный логин или пароль', form=form)
     return render_template('login.html', form=form)
 
 
