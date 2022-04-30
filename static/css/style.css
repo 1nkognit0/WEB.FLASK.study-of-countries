@@ -59,3 +59,40 @@ a:hover {
 .radio-buttons {
     display: inline-block;
 }
+
+
+.drop-button {
+    margin-top: 8px;
+    margin-left: 20px;
+    margin-right: 40px;
+    padding: 6px 10px 6px 10px;
+    color: black;
+    border: none;
+    border-radius: 5px;
+}
+
+.dropdown {
+    position: relative;
+    display: inline-block;
+}
+
+.dropdown-content {
+    display: none;
+    position: absolute;
+    background-color: white;
+    width: 200px;
+    border-radius: 10px;
+}
+
+.dropdown-content a {
+    color: black;
+    padding: 10px 10px;
+    text-decoration: none;
+    display: block;
+}
+
+.dropdown-content a:hover {background-color: #ddd;}
+
+.dropdown:hover .dropdown-content {display: block;}
+
+.dropdown:hover .drop-button {background-color: #ffd107;}
