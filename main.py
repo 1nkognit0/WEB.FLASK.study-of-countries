@@ -1,8 +1,8 @@
 from flask import Flask, render_template, url_for, redirect, request
 from random import choice, randint
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
-from data.register import RegisterForm
-from data.login import LoginForm
+from data.form_registration import RegisterForm
+from data.form_login import LoginForm
 from data.users import User
 
 import os
@@ -179,7 +179,7 @@ def register_page():
         session.add(user)
         session.commit()
         return redirect(url_for('login_page'))
-    return render_template('reg.html', form=form)
+    return render_template('registration.html', form=form)
 
 
 @login_manager.user_loader
