@@ -20,27 +20,41 @@
         <div class="container navbar">
             <ul class="navbar-nav font-weight-bold mx-auto">
                 <li class="nav-item">
-                    <a class="nav-item nav-link h4" href="/" style="margin-left: 150px;">Страны</a>
+                    <a class="nav-item nav-link h4" href="/" style="margin-left: 220px;">Страны</a>
                 </li>
                 <li class="nav-item">
                     <a class="nav-item nav-link h4" href="/quizzes">Викторины</a>
                 </li>
             </ul>
             <ul class="navbar-nav font-weight-bold mx-right">
+
                 {% if current_user.is_authenticated %}
+
                 <li class="nav-item">
                     <span class="nav-item nav-link active h4">{{ current_user.login }}</span>
                 </li>
-                <li class="nav-item">
-                    <a class="nav-item nav-link h4" href="{{ url_for('log_out') }}">Выход</a>
+
+                <li class="nav-item dropdown">
+                  <div class="dropdown">
+                      <button class="drop-button btn-warning">Меню <font size="2px;">▼</font></button>
+                      <div class="dropdown-content">
+                          <a href="#">Таблица лидеров</a>
+                          <a href="#">Получение БД в формате json</a>
+                          <a href="{{ url_for('log_out') }}"> <font color="red">Выход из аккаунта</font></a>
+                      </div>
+                  </div>
                 </li>
+
                 {% else %}
+
                 <li class="nav-item">
                     <a class="nav-item nav-link h4" href="{{ url_for('register_page') }}">Регистрация</a>
                 </li>
+
                 <li class="nav-item">
                     <a class="nav-item nav-link h4" href="{{ url_for('login_page') }}">Вход</a>
                 </li>
+
                 {% endif %}
             </ul>
 
