@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+
+{% block title %} Профиль {% endblock %}
+
+{% block content %}
+
+<head>
+    <style>
+    ul.stats {
+        margin: 0;
+        padding: 4px;
+   }
+   ul.stats li {
+        display: inline-block;
+        margin-right: 5px;
+        padding: 0px;
+        font-size: 30px;
+   }
+  </style>
+ </head>
+
+<h1 class="h1 mb-4 text-center" style="margin-top: 30px;">Профиль пользователя <strong>{{data.login}}</strong></h1>
+
+<div align="center" style="margin-top: 80px;">
+    <img src={{data.avatar}}  alt="Not found" width="200px" style="border-radius: 300px;">
+    <h1 style="margin-top: 25px;"><strong>{{data.login}}</strong></h1>
+    <p style="color: #b3b2b2; font-size: 25px;">{{data.description}}</p>
+</div>
+
+<div align="center">
+    <ul class="stats">
+        <li style="padding-right: 20px; color: blue">
+            <strong>{{days}}</strong>
+            <div style="line-height: 0.8;">
+                <font size="3px">дней аккаунт <br> существует</font>
+            </div></li>
+
+        <li>
+            <div class="vl"></div></li>
+
+        <li style="padding-left: 20px; padding-right: 20px; color: red">
+            <strong>{{data.amount_quiz}}</strong>
+            <div style="line-height: 0.8;">
+                <font size="3px">викторин <br> пройдено</font>
+            </div></li>
+
+        <li>
+            <div class="vl"></div></li>
+
+        <li style="padding-left: 20px; color: green">
+            <strong>{{wins}}%</strong>
+            <div style="line-height: 0.8;">
+                <font size="3px">правильных <br> ответов</font>
+            </div></li>
+    </ul>
+</div>
+{% endblock %}
