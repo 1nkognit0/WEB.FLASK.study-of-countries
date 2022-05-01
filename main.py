@@ -1,5 +1,6 @@
 from flask import Flask, render_template, url_for, redirect, request
 from random import choice, randint
+import datetime
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from data.form_registration import RegisterForm
 from data.form_login import LoginForm
@@ -42,10 +43,7 @@ session = db_session.create_session()
 def certain_country(name):
     if name == 'favicon.ico':
         return
-    global score_quiz, win_score_quiz, progress_on_quiz
-    score_quiz = 0
-    win_score_quiz = 0
-    progress_on_quiz = progress_on_quiz_copy.copy()
+    reset_data()
     country = session.query(Country).filter(Country.name == name).first()
 
     return render_template('country.html', data=country)
@@ -53,10 +51,7 @@ def certain_country(name):
 
 @app.route('/sorting/<string:sort>')
 def parts_country(sort):
-    global score_quiz, win_score_quiz, progress_on_quiz
-    score_quiz = 0
-    win_score_quiz = 0
-    progress_on_quiz = progress_on_quiz_copy.copy()
+    reset_data()
 
     if sort in parts_of_world:
         countries = session.query(Country).filter(Country.parts_of_world == sort).all()
@@ -68,12 +63,20 @@ def parts_country(sort):
     return render_template('part_selection.html', data=countries, name=sort)
 
 
+@app.route('/profile/<nickname>')
+def profile_page(nickname):
+    reset_data()
+    info = session.query(User).filter(User.login == nickname).first()
+
+    days = (datetime.datetime.now() - info.created_date).days
+    wins = int((info.correct_answers / (info.amount_quiz * 10)) * 100)
+
+    return render_template('profile.html', data=info, days=days, wins=wins)
+
+
 @app.route('/', methods=['GET', 'POST'])
 def main_page():
-    global score_quiz, win_score_quiz, progress_on_quiz
-    score_quiz = 0
-    win_score_quiz = 0
-    progress_on_quiz = progress_on_quiz_copy.copy()
+    reset_data()
 
     form = SearchForm()
     if request.method == 'POST':
@@ -87,10 +90,7 @@ def main_page():
 
 @app.route('/quizzes', methods=['GET', 'POST'])
 def quizzes():
-    global score_quiz, win_score_quiz, progress_on_quiz, select_option
-    score_quiz = 0
-    win_score_quiz = 0
-    progress_on_quiz = progress_on_quiz_copy.copy()
+    reset_data()
 
     if request.method == 'POST':
         select_option = [name for name in request.form.items()][0][1]
@@ -167,6 +167,7 @@ def search_options():
 
 @app.route('/reg', methods=['GET', 'POST'])
 def register_page():
+    reset_data()
     form = RegisterForm()
     if form.validate_on_submit():
         if form.password.data != form.confirm_password.data:
@@ -189,6 +190,7 @@ def load_user(user_id):
 
 @app.route('/login', methods=['GET', 'POST'])
 def login_page():
+    reset_data()
     form = LoginForm()
     if form.validate_on_submit():
         user = session.query(User).filter(User.login == form.username.data).first()
@@ -204,6 +206,13 @@ def login_page():
 def log_out():
     logout_user()
     return redirect('/')
+
+
+def reset_data():
+    global score_quiz, win_score_quiz, progress_on_quiz
+    score_quiz = 0
+    win_score_quiz = 0
+    progress_on_quiz = progress_on_quiz_copy.copy()
 
 
 port = int(os.environ.get("PORT", 5000))
