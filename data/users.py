@@ -11,7 +11,11 @@ class User(SqlAlchemyBase, UserMixin):
     id = sqlalchemy.Column(sqlalchemy.Integer, primary_key=True, autoincrement=True)
     login = sqlalchemy.Column(sqlalchemy.String, index=True, unique=True, nullable=True)
     hashed_password = sqlalchemy.Column(sqlalchemy.String, nullable=True)
-    created_date = sqlalchemy.Column(sqlalchemy.DateTime, default=datetime.datetime.now)
+    created_date = sqlalchemy.Column(sqlalchemy.DateTime, default=datetime.date.today())
+    description = sqlalchemy.Column(sqlalchemy.String, nullable=True)
+    avatar = sqlalchemy.Column(sqlalchemy.String, nullable=True)
+    amount_quiz = sqlalchemy.Column(sqlalchemy.Integer, nullable=True)
+    correct_answers = sqlalchemy.Column(sqlalchemy.Integer, nullable=True)
 
     def set_password(self, password):
         self.hashed_password = generate_password_hash(password)
