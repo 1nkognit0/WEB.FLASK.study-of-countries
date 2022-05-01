@@ -96,3 +96,8 @@ a:hover {
 .dropdown:hover .dropdown-content {display: block;}
 
 .dropdown:hover .drop-button {background-color: #ffd107;}
+
+.vl {
+    border-left: 1px solid gray;
+    height: 75px;
+}
