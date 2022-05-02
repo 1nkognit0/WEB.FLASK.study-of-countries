@@ -92,6 +92,8 @@ def main_page():
 def quizzes():
     reset_data()
 
+    global select_option
+
     if request.method == 'POST':
         select_option = [name for name in request.form.items()][0][1]
     return render_template('quizzes.html', select=select_option, parts=parts_of_world)
@@ -119,50 +121,56 @@ def quiz_flags():
 
 def form_for_quizzes():
     form = ButtonForm()
-    global score_quiz, win_score_quiz, progress_on_quiz
+    global score_quiz, win_score_quiz, progress_on_quiz, wrong_options, correct_options
 
-    options, correct = search_options()
-
-    form.correct_option.label.text = correct[score_quiz].name
-    form.option2.label.text = options[score_quiz][0].name
-    form.option3.label.text = options[score_quiz][1].name
-    form.option4.label.text = options[score_quiz][2].name
+    if not bool(wrong_options):
+        search_options()
 
     if request.method == 'POST':
         answer = [name for name in request.form]
         if answer[0] == 'correct_option':
             win_score_quiz += 1
-            progress_on_quiz[score_quiz] = 'green'
+            progress_on_quiz[score_quiz - 1] = 'green'
         else:
-            progress_on_quiz[score_quiz] = 'red'
-        score_quiz += 1
-        if score_quiz == 10:
-            score_quiz = 0
+            progress_on_quiz[score_quiz - 1] = 'red'
+        if score_quiz >= 10:
             win = win_score_quiz
-            win_score_quiz = 0
-            progress_on_quiz = progress_on_quiz_copy.copy()
+            reset_data()
             return ['end', win]
+
+    form.correct_option.label.text = correct_options[score_quiz].name
+    form.option2.label.text = wrong_options[score_quiz][0].name
+    form.option3.label.text = wrong_options[score_quiz][1].name
+    form.option4.label.text = wrong_options[score_quiz][2].name
+
     # использую randint чтобы сделать рандомную последоватльность вывода кнопок(способа лучше не нашёл)
     buttons = randint(1, 4)
-    return ['run', form, correct[score_quiz], buttons]
+    print(score_quiz)
+    score_quiz += 1
+    return ['run', form, correct_options[score_quiz - 1], buttons]
 
 
 # функция для генерации вопросов на викторине
 def search_options():
     global wrong_options, correct_options, select_option
+
     if select_option == 'Все':
         countries = session.query(Country).all()
     else:
         countries = session.query(Country).filter(Country.parts_of_world == select_option).all()
 
     for count in range(10):
-        correct_options.append(choice(countries))
+        while True:
+            correct_options.append(choice(countries))
+            if correct_options[-1] not in correct_options[0:len(correct_options) - 1]:
+                break
+            else:
+                del correct_options[-1]
         wrong_options.append([])
         while len(wrong_options[count]) < 3:
             opt = choice(countries)
             if opt != correct_options[count]:
                 wrong_options[count].append(opt)
-    return wrong_options, correct_options
 
 
 @app.route('/reg', methods=['GET', 'POST'])
@@ -209,10 +217,12 @@ def log_out():
 
 
 def reset_data():
-    global score_quiz, win_score_quiz, progress_on_quiz
+    global score_quiz, win_score_quiz, progress_on_quiz, wrong_options, correct_options
     score_quiz = 0
     win_score_quiz = 0
     progress_on_quiz = progress_on_quiz_copy.copy()
+    wrong_options = []
+    correct_options = []
 
 
 port = int(os.environ.get("PORT", 5000))
