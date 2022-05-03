@@ -4,7 +4,7 @@
 
 {% block content %}
 
-<form method="post" class="registration-form" action="" novalidate style="margin-right: 200px; margin-left: 200px;">
+<form method="post" class="registration-form" action="" novalidate style="margin-right: 200px; margin-left: 200px;" enctype="multipart/form-data">
 
     <h1 class="h2 mb-3 text-center" style="margin-top: 30px;">Регистрация аккаунта</h1>
     {{ form.hidden_tag() }}
@@ -51,7 +51,19 @@
         {% endif %}
     </div>
 
-    {{ form.submit(type="submit", class="btn btn-warning btn-lg btn-block") }}
+    <div class="form-group">
+        {{ form.description.label }}
+        {{ form.description(class="form-control") }}
+    </div>
+
+    <div class="input-group mb-3" style="margin-top: 30px;">
+        {{ form.avatar.label }}
+        {{ form.avatar(class="form-control-file") }}
+    </div>
+
+    <div style="margin-top: 30px;">
+        {{ form.submit(type="submit", class="btn btn-warning btn-lg btn-block") }}
+    </div>
 
 </form>
 
