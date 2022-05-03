@@ -1,10 +1,12 @@
 from flask_wtf import FlaskForm
-from wtforms import StringField, PasswordField, SubmitField
+from wtforms import StringField, PasswordField, SubmitField, FileField
 from wtforms.validators import DataRequired
 
 
 class RegisterForm(FlaskForm):
-    username = StringField('Логин', validators=[DataRequired()])
+    username = StringField('Имя', validators=[DataRequired()])
     password = PasswordField('Пароль', validators=[DataRequired()])
     confirm_password = PasswordField('Подтвердить пароль', validators=[DataRequired()])
+    description = StringField('Описание(статус) профиля (необязательно)')
+    avatar = FileField("Картинка вашего профиля (необязательно)")
     submit = SubmitField('Регистрация')
