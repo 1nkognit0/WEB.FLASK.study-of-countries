@@ -7,6 +7,7 @@ from data.form_login import LoginForm
 from data.users import User
 
 import os
+from shutil import copy
 
 from data import db_session
 from data.country import Country
@@ -67,9 +68,12 @@ def parts_country(sort):
 def profile_page(nickname):
     reset_data()
     info = session.query(User).filter(User.login == nickname).first()
+    print(current_user.avatar)
+    wins = '-'
 
     days = (datetime.datetime.now() - info.created_date).days
-    wins = int((info.correct_answers / (info.amount_quiz * 10)) * 100)
+    if info.amount_quiz != 0:
+        wins = str(int((info.correct_answers / (info.amount_quiz * 10)) * 100)) + '%'
 
     return render_template('profile.html', data=info, days=days, wins=wins)
 
@@ -136,6 +140,12 @@ def form_for_quizzes():
         if score_quiz >= 10:
             win = win_score_quiz
             reset_data()
+            if current_user.is_authenticated:
+                user = session.query(User).filter(User.login == current_user.login).first()
+                user.amount_quiz += 1
+                user.correct_answers += win
+                session.commit()
+
             return ['end', win]
 
     form.correct_option.label.text = correct_options[score_quiz].name
@@ -179,12 +189,27 @@ def register_page():
     form = RegisterForm()
     if form.validate_on_submit():
         if form.password.data != form.confirm_password.data:
-            return render_template('reg.html', form=form, pas_err='Пароли не совпадают')
+            return render_template('registration.html', form=form, pas_err='Пароли не совпадают')
 
         if session.query(User).filter(User.login == form.username.data).first():
-            return render_template('reg.html', form=form, user_err='Такой пользователь уже существует')
-        user = User(login=form.username.data)
+            return render_template('registration.html', form=form, user_err='Такой пользователь уже существует')
+        user = User()
+        user.login = form.username.data
         user.set_password(form.password.data)
+        user.description = form.description.data
+
+        img = form.avatar.data
+        dir_img = f'static/img/avatar/{form.username.data}'
+        if not os.path.isdir(dir_img):
+            os.makedirs(dir_img)
+        if img:
+            full_path_img = f'{dir_img}/{img.filename}'
+            img.save(full_path_img)
+        else:
+            copy('static/img/avatar/default/default.jpg', f'{dir_img}/default.jpg')
+            full_path_img = f'{dir_img}/default.jpg'
+        user.avatar = f'../{full_path_img}'
+
         session.add(user)
         session.commit()
         return redirect(url_for('login_page'))
