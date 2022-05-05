@@ -38,12 +38,24 @@ form_government = ['Конституционная монархия', 'Парл�
 # подключение к базе
 db_session.global_init('db/CountryDB.db')
 session = db_session.create_session()
+all_countries = session.query(Country).all()
 
 
-@app.route('/<string:name>')
+@app.route('/leaderboard')
+def leaderboard():
+    users = session.query(User.login, User.amount_quiz, User.correct_answers).all()
+
+    sorted_users = [user for user in users if user[1] != 0]
+    leaders = sorted(sorted_users, key=lambda x: (x[2], x[1]))
+
+    for place, user in enumerate(leaders[::-1]):
+        leaders[place] = (place + 1, user[0], user[1], user[2])
+
+    return render_template('leaderboard.html', leaders=leaders)
+
+
+@app.route('/country/<string:name>')
 def certain_country(name):
-    if name == 'favicon.ico':
-        return
     reset_data()
     country = session.query(Country).filter(Country.name == name).first()
 
@@ -68,7 +80,6 @@ def parts_country(sort):
 def profile_page(nickname):
     reset_data()
     info = session.query(User).filter(User.login == nickname).first()
-    print(current_user.avatar)
     wins = '-'
 
     days = (datetime.datetime.now() - info.created_date).days
@@ -87,7 +98,7 @@ def main_page():
         post = [name for name in request.form.items()]
         countries = session.query(Country).filter(Country.name.contains(post[0][1])).all()
     else:
-        countries = session.query(Country).all()
+        countries = all_countries
 
     return render_template('index.html', form=form, data=countries)
 
@@ -155,7 +166,6 @@ def form_for_quizzes():
 
     # использую randint чтобы сделать рандомную последоватльность вывода кнопок(способа лучше не нашёл)
     buttons = randint(1, 4)
-    print(score_quiz)
     score_quiz += 1
     return ['run', form, correct_options[score_quiz - 1], buttons]
 
@@ -165,7 +175,7 @@ def search_options():
     global wrong_options, correct_options, select_option
 
     if select_option == 'Все':
-        countries = session.query(Country).all()
+        countries = all_countries
     else:
         countries = session.query(Country).filter(Country.parts_of_world == select_option).all()
 
