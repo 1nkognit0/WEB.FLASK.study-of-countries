@@ -101,3 +101,9 @@ a:hover {
     border-left: 1px solid gray;
     height: 75px;
 }
+
+.leaderboard {
+    height: 500px;
+    background: #dedede;
+    border-radius: 25px;
+}
