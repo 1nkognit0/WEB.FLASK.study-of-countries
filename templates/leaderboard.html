@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %} Вход в аккаунт {% endblock %}
+
+{% block content %}
+
+<head>
+    <style>
+        tr.table {
+            padding-top: 0px;
+            padding-bottom: 0px;
+        }
+
+        tr.table:hover{
+             background: #bfbfbf;
+        }
+
+        td.table td {
+            padding-top: 20px;
+            padding-bottom: 20px;
+        }
+        table tr td a {
+            display: block;
+            width: 100%;
+            height: 100%;
+        }
+    </style>
+</head>
+
+<h1 class="mb-4 text-center" style="margin-top: 50px;">Таблица лидеров</h1>
+<h6 align="center" style="margin-top: 0px; margin-bottom: 45px;">(Пользователи, которые не прошли ни одной викторины, в таблице не отображаются)</h6>
+
+<center>
+    <table class="leaderboard">
+        <tr>
+            <td style="padding: 15px;">
+                <strong>Место</strong>
+            </td>
+            <td style="padding-left: 17px;">
+                <strong>Имя</strong>
+            </td>
+            <td style="padding: 15px;">
+                <strong>Сыгранные викторины</strong>
+            </td>
+            <td style="padding: 15px;">
+                <strong>Правильные ответы</strong>
+            </td>
+        </tr>
+        {% for leader in leaders %}
+            {% if leader[0] <= 10 %}
+                <tr class="table">
+                    <td style="padding-left: 30px;">
+                        {% if leader[0] == 1 %}
+                            <strong><font color="yellow" size="4px">1</font></strong>
+                        {% elif leader[0] == 2 %}
+                            <strong><font color="silver">2</font></strong>
+                        {% elif leader[0] == 3 %}
+                            <strong><font color="SaddleBrown">3</font></strong>
+                        {% else %}
+                            <strong>{{leader[0]}}</strong>
+                        {% endif %}
+                    </td>
+                    <td>
+                        <a href="/profile/{{leader[1]}}">{{leader[1]}}</a>
+                    </td>
+                    <td style="padding-left: 85px;">
+                        {{leader[2]}}
+                    </td>
+                    <td style="padding-left: 70px;">
+                        {{leader[3]}}
+                    </td>
+                </tr>
+            {% endif %}
+        {% endfor %}
+    </table>
+</center>
+
+
+{% endblock %}
