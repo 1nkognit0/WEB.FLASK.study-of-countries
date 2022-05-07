@@ -1,4 +1,4 @@
-from flask import Flask, render_template, url_for, redirect, request
+from flask import Flask, render_template, url_for, redirect, request, jsonify
 from random import choice, randint
 import datetime
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
@@ -27,18 +27,31 @@ score_quiz = 0
 win_score_quiz = 0
 progress_on_quiz = ['black' for _ in range(10)]
 progress_on_quiz_copy = progress_on_quiz.copy()
-parts_of_world = ['Все', 'Африка', 'Северная Америка', 'Южная Америка', 'Европа', 'Австралия и Океания', 'Азия']
+PARTS_OF_WORLD = ['Все', 'Африка', 'Северная Америка', 'Южная Америка', 'Европа', 'Австралия и Океания', 'Азия']
 select_option = 'Все'
 wrong_options = []
 correct_options = []
 
-form_government = ['Конституционная монархия', 'Парламентская республика', 'Президентская республика',
+FORM_GOVERNMENT = ['Конституционная монархия', 'Парламентская республика', 'Президентская республика',
                    'Смешанная республика', 'Абсолютная монархия', 'Социалистическая республика', 'Исламская республика']
 
 # подключение к базе
 db_session.global_init('db/CountryDB.db')
 session = db_session.create_session()
-all_countries = session.query(Country).all()
+ALL_COUNTRIES = session.query(Country).all()
+
+
+@app.route('/http-api')
+def database_return():
+    return jsonify(
+        {
+            'counties':
+                [county.to_dict(only=('id', 'name', 'capital', 'language', 'form_government', 'territory',
+                                      'population', 'density', 'flag', 'parts_of_world'))
+                 for county in ALL_COUNTRIES]
+
+        }
+    )
 
 
 @app.route('/leaderboard')
@@ -66,9 +79,9 @@ def certain_country(name):
 def parts_country(sort):
     reset_data()
 
-    if sort in parts_of_world:
+    if sort in PARTS_OF_WORLD:
         countries = session.query(Country).filter(Country.parts_of_world == sort).all()
-    elif sort in form_government:
+    elif sort in FORM_GOVERNMENT:
         countries = session.query(Country).filter(Country.form_government == sort).all()
     else:
         countries = session.query(Country).filter(Country.language == sort).all()
@@ -98,7 +111,7 @@ def main_page():
         post = [name for name in request.form.items()]
         countries = session.query(Country).filter(Country.name.contains(post[0][1])).all()
     else:
-        countries = all_countries
+        countries = ALL_COUNTRIES
 
     return render_template('index.html', form=form, data=countries)
 
@@ -111,7 +124,7 @@ def quizzes():
 
     if request.method == 'POST':
         select_option = [name for name in request.form.items()][0][1]
-    return render_template('quizzes.html', select=select_option, parts=parts_of_world)
+    return render_template('quizzes.html', select=select_option, parts=PARTS_OF_WORLD)
 
 
 @app.route('/quizzes/capital', methods=['GET', 'POST'])
@@ -175,7 +188,7 @@ def search_options():
     global wrong_options, correct_options, select_option
 
     if select_option == 'Все':
-        countries = all_countries
+        countries = ALL_COUNTRIES
     else:
         countries = session.query(Country).filter(Country.parts_of_world == select_option).all()
 
