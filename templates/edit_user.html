@@ -1,0 +1,80 @@
+{% extends "base.html" %}
+
+{% block title %} Регистрация аккаунта {% endblock %}
+
+{% block content %}
+
+<form method="post" class="registration-form" action="" novalidate style="margin-right: 200px; margin-left: 200px;" enctype="multipart/form-data">
+
+    <h2 class="mb-3 text-center" style="margin-top: 30px;">Изменение настроек аккаунта</h2>
+    {{ form.hidden_tag() }}
+
+    <div class="form-group">
+        {{ form.username.label }}
+        {{ form.username(class="form-control") }}
+        {% if form.username.errors %}
+            {% for error in form.username.errors %}
+                <div class="alert alert-danger" role="alert">
+                    {{ error }}
+                </div>
+            {% endfor %}
+        {% elif user_err %}
+            <div class="alert alert-danger" role="alert">
+                {{ user_err }}
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="form-group">
+        {{ form.new_password.label }}
+        {{ form.new_password(class="form-control", type="password") }}
+    </div>
+
+    <div class="form-group">
+        {{ form.confirm_new_password.label }}
+        {{ form.confirm_new_password(class="form-control", type="password") }}
+        {% if pas_err %}
+            <div class="alert alert-danger" role="alert">
+                {{ pas_err }}
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="form-group">
+        {{ form.description.label }}
+        {{ form.description(class="form-control") }}
+    </div>
+
+    <div class="input-group mb-3" style="margin-top: 30px;">
+        {{ form.avatar.label }}
+        {{ form.avatar(class="form-control-file") }}
+    </div>
+
+    <div class="form-group" style="margin-bottom: 50px;">
+        <div class="custom-control custom-checkbox">
+            {{ form.delete_avatar(class="custom-control-input") }}
+            {{ form.delete_avatar.label(class="custom-control-label") }}
+        </div>
+    </div>
+
+    <div class="form-group">
+        {{ form.password.label }}
+        {{ form.password(class="form-control", type="password") }}
+        {% for error in form.password.errors %}
+            <div class="alert alert-danger" role="alert">
+                {{ error }}
+            </div>
+        {% endfor %}
+        {% if message %}
+            <div class="alert alert-danger" role="alert">
+                {{ message }}
+            </div>
+        {% endif %}
+    </div>
+
+    <div style="margin-top: 30px;">
+        {{ form.submit(type="submit", class="btn btn-warning btn-lg btn-block") }}
+    </div>
+
+</form>
+{% endblock %}
