@@ -2,18 +2,20 @@ from flask import Flask, render_template, url_for, redirect, request, jsonify
 from random import choice, randint
 import datetime
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
-from data.form_registration import RegisterForm
-from data.form_login import LoginForm
 from data.users import User
 
 import os
-from shutil import copy
+from shutil import copy, rmtree
 
 from data import db_session
 from data.country import Country
 
 from data.form_button import ButtonForm
 from data.form_search import SearchForm
+from data.form_registration import RegisterForm
+from data.form_login import LoginForm
+from data.form_edit_user import EditUserForm
+
 
 app = Flask(__name__)
 login_manager = LoginManager()
@@ -43,6 +45,7 @@ ALL_COUNTRIES = session.query(Country).all()
 
 @app.route('/http-api')
 def database_return():
+    reset_data()
     return jsonify(
         {
             'counties':
@@ -56,6 +59,7 @@ def database_return():
 
 @app.route('/leaderboard')
 def leaderboard():
+    reset_data()
     users = session.query(User.login, User.amount_quiz, User.correct_answers).all()
 
     sorted_users = [user for user in users if user[1] != 0]
@@ -92,6 +96,7 @@ def parts_country(sort):
 @app.route('/profile/<nickname>')
 def profile_page(nickname):
     reset_data()
+
     info = session.query(User).filter(User.login == nickname).first()
     wins = '-'
 
@@ -100,6 +105,57 @@ def profile_page(nickname):
         wins = str(int((info.correct_answers / (info.amount_quiz * 10)) * 100)) + '%'
 
     return render_template('profile.html', data=info, days=days, wins=wins)
+
+
+@app.route('/edit/<nickname>',  methods=['GET', 'POST'])
+def edit_user(nickname):
+    reset_data()
+    form = EditUserForm()
+    if request.method == "GET":
+        user = session.query(User).filter(User.login == nickname).first()
+        if user:
+            form.username.data = user.login
+            form.description.data = user.description
+
+    if form.validate_on_submit():
+        user = session.query(User).filter(User.login == nickname).first()
+        user.description = form.description.data
+        img = form.avatar.data
+
+        if not user.check_password(form.password.data):
+            return render_template('edit_user.html', message='Неверный пароль', form=form)
+
+        if form.new_password.data and form.confirm_new_password.data:
+            if form.new_password.data != form.confirm_new_password.data:
+                return render_template('edit_user.html', form=form, pas_err='Пароли не совпадают')
+            user.set_password(form.new_password.data)
+
+        if user.login != form.username.data:
+            if session.query(User).filter(User.login == form.username.data).first():
+                return render_template('edit_user.html', form=form, user_err='Такой пользователь уже существует')
+            dir_img = f'static/img/avatar/{form.username.data}'
+            if img.filename or form.delete_avatar.data:
+                rmtree(f'static/img/avatar/{user.login}')
+                os.makedirs(dir_img)
+        else:
+            dir_img = f'static/img/avatar/{user.login}'
+            if img.filename or form.delete_avatar.data:
+                os.remove(user.avatar[3:])
+        if img.filename or form.delete_avatar.data:
+            if form.delete_avatar.data:
+                copy('static/img/avatar/default/default.jpg', f'{dir_img}/default.jpg')
+                full_path_img = f'{dir_img}/default.jpg'
+            else:
+                full_path_img = f'{dir_img}/{img.filename}'
+                img.save(full_path_img)
+            user.avatar = f'../{full_path_img}'
+
+        user.login = form.username.data
+        session.commit()
+
+        return redirect(f'../profile/{form.username.data}')
+
+    return render_template('edit_user.html', form=form)
 
 
 @app.route('/', methods=['GET', 'POST'])
