@@ -8,5 +8,5 @@ class RegisterForm(FlaskForm):
     password = PasswordField('Пароль', validators=[DataRequired()])
     confirm_password = PasswordField('Подтвердить пароль', validators=[DataRequired()])
     description = StringField('Описание(статус) профиля (необязательно)')
-    avatar = FileField("Картинка вашего профиля (необязательно)")
+    avatar = FileField("Фото вашего профиля (необязательно)")
     submit = SubmitField('Регистрация')
