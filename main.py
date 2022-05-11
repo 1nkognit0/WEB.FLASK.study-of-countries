@@ -34,9 +34,6 @@ select_option = 'Все'
 wrong_options = []
 correct_options = []
 
-FORM_GOVERNMENT = ['Конституционная монархия', 'Парламентская республика', 'Президентская республика',
-                   'Смешанная республика', 'Абсолютная монархия', 'Социалистическая республика', 'Исламская республика']
-
 # подключение к базе
 db_session.global_init('db/CountryDB.db')
 session = db_session.create_session()
@@ -82,8 +79,6 @@ def parts_country(sort):
 
     if sort in PARTS_OF_WORLD:
         countries = session.query(Country).filter(Country.parts_of_world == sort).all()
-    elif sort in FORM_GOVERNMENT:
-        countries = session.query(Country).filter(Country.form_government == sort).all()
     else:
         countries = session.query(Country).filter(Country.language == sort).all()
 
