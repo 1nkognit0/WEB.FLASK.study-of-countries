@@ -16,3 +16,6 @@ class Country(SqlAlchemyBase, SerializerMixin):
     density = sqlalchemy.Column(sqlalchemy.Float, nullable=True)
     flag = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     parts_of_world = sqlalchemy.Column(sqlalchemy.String, nullable=True)
+
+    def as_dict(self):
+        return {c.name: getattr(self, c.name) for c in self.__table__.columns}
