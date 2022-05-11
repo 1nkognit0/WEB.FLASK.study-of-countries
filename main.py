@@ -82,10 +82,8 @@ def parts_country(sort):
 
     if sort in PARTS_OF_WORLD:
         countries = session.query(Country).filter(Country.parts_of_world == sort).all()
-        
     elif sort in FORM_GOVERNMENT:
         countries = session.query(Country).filter(Country.form_government == sort).all()
-        
     else:
         countries = session.query(Country).filter(Country.language == sort).all()
 
@@ -192,6 +190,16 @@ def quiz_capitals():
         return render_template('results.html', win=info[1])
 
 
+@app.route('/quizzes/government', methods=['GET', 'POST'])
+def quiz_governments():
+    info = form_for_quizzes()
+    if info[0] == 'run':
+        return render_template('quiz-government.html',
+                               form=info[1], correct=info[2], buttons=info[3], progress=progress_on_quiz)
+    else:
+        return render_template('results.html', win=info[1])
+
+
 @app.route('/quizzes/flag', methods=['GET', 'POST'])
 def quiz_flags():
     info = form_for_quizzes()
@@ -232,7 +240,8 @@ def form_for_quizzes():
     form.option3.label.text = wrong_options[score_quiz][1].name
     form.option4.label.text = wrong_options[score_quiz][2].name
 
-    # использую randint чтобы сделать рандомную последоватльность вывода кнопок(способа лучше не нашёл)
+
+    # randint используется чтобы сделать рандомную последоватльность вывода кнопок
     buttons = randint(1, 4)
     score_quiz += 1
     return ['run', form, correct_options[score_quiz - 1], buttons]
