@@ -45,13 +45,10 @@ ALL_COUNTRIES = session.query(Country).all()
 
 @app.route('/http-api')
 def database_return():
-    reset_data()
     return jsonify(
         {
             'counties':
-                [county.to_dict(only=('id', 'name', 'capital', 'language', 'form_government', 'territory',
-                                      'population', 'density', 'flag', 'parts_of_world'))
-                 for county in ALL_COUNTRIES]
+                [county.as_dict() for county in ALL_COUNTRIES[:10]]
 
         }
     )
