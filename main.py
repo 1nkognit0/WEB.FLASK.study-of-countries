@@ -210,6 +210,60 @@ def quiz_flags():
         return render_template('results.html', win=info[1])
 
 
+@app.route('/quizzes/survive-capital', methods=['GET', 'POST'])
+def quiz_survive_capitals():
+    info = form_for_survive()
+    if info[0] == 'run':
+        return render_template('survive-capital.html',
+                               form=info[1], correct=info[2], buttons=info[3], progress=progress_on_quiz)
+    else:
+        return render_template('survive-result.html', win=info[1])
+
+
+@app.route('/quizzes/survive-flag', methods=['GET', 'POST'])
+def quiz_survive_flag():
+    info = form_for_survive()
+    if info[0] == 'run':
+        return render_template('survive-flag.html',
+                               form=info[1], correct=info[2], buttons=info[3], progress=progress_on_quiz)
+    else:
+        return render_template('survive-result.html', win=info[1])
+
+
+def form_for_survive():
+    form = ButtonForm()
+    global score_quiz, win_score_quiz, progress_on_quiz, wrong_options, correct_options
+
+    if not bool(wrong_options):
+        search_options()
+
+    if request.method == 'POST':
+        answer = [name for name in request.form]
+        win = win_score_quiz
+        if answer[0] == 'correct_option':
+            win_score_quiz += 1
+        else:
+            return ['end', win]
+        if score_quiz >= 100:
+            win = win_score_quiz
+            reset_data()
+            if current_user.is_authenticated:
+                user = session.query(User).filter(User.login == current_user.login).first()
+                user.amount_quiz += 1
+                user.correct_answers += win
+                session.commit()
+
+    form.correct_option.label.text = correct_options[score_quiz].name
+    form.option2.label.text = wrong_options[score_quiz][0].name
+    form.option3.label.text = wrong_options[score_quiz][1].name
+    form.option4.label.text = wrong_options[score_quiz][2].name
+
+    # randint используется чтобы сделать рандомную последоватльность вывода кнопок
+    buttons = randint(1, 4)
+    score_quiz += 1
+    return ['run', form, correct_options[score_quiz - 1], buttons]
+
+
 def form_for_quizzes():
     form = ButtonForm()
     global score_quiz, win_score_quiz, progress_on_quiz, wrong_options, correct_options
