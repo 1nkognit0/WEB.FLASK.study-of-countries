@@ -1,0 +1,32 @@
+{% extends "base.html" %}
+
+{% block title %} Удаление аккаунта {% endblock %}
+
+{% block content %}
+
+<form method="post" class="registration-form" action="" novalidate style="margin-right: 200px; margin-left: 200px;">
+
+    <h2 class="mb-3 text-center" style="margin-top: 30px;">Удаление аккаунта</h2>
+    {{ form.hidden_tag() }}
+
+    <div class="form-group" style="margin-right: 100px; margin-left: 100px;">
+        {{ form.password.label }}
+        {{ form.password(class="form-control", type="password") }}
+        {% for error in form.password.errors %}
+            <div class="alert alert-danger" role="alert">
+                {{ error }}
+            </div>
+        {% endfor %}
+        {% if message %}
+            <div class="alert alert-danger" role="alert">
+                {{ message }}
+            </div>
+        {% endif %}
+    </div>
+
+    <div style="margin-top: 30px; margin-right: 100px; margin-left: 100px;">
+        {{ form.submit(type="submit", class="btn btn-danger btn-lg btn-block") }}
+    </div>
+
+</form>
+{% endblock %}
