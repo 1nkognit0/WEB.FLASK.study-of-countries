@@ -1,11 +1,11 @@
-from flask import Flask, render_template, url_for, redirect, request, jsonify
+from flask import Flask, render_template, url_for, redirect, request, jsonify, abort
 from random import choice, randint
 import datetime
 from flask_login import LoginManager, login_user, login_required, logout_user, current_user
 from data.users import User
 
 import os
-from shutil import copy, rmtree
+from shutil import copy
 
 from data import db_session
 from data.country import Country
@@ -15,11 +15,13 @@ from data.form_search import SearchForm
 from data.form_registration import RegisterForm
 from data.form_login import LoginForm
 from data.form_edit_user import EditUserForm
+from data.form_delete_user import DeleteUserForm
 
 
 app = Flask(__name__)
 login_manager = LoginManager()
 login_manager.init_app(app)
+login_manager.login_view = 'login_page'
 
 # ключ
 app.config['SECRET_KEY'] = 'some_key'
@@ -44,17 +46,18 @@ ALL_COUNTRIES = session.query(Country).all()
 
 
 @app.route('/http-api')
+@login_required
 def database_return():
     return jsonify(
         {
             'counties':
                 [county.as_dict() for county in ALL_COUNTRIES[:10]]
-
         }
     )
 
 
 @app.route('/leaderboard')
+@login_required
 def leaderboard():
     reset_data()
     users = session.query(User.login, User.amount_quiz, User.correct_answers).all()
@@ -91,6 +94,7 @@ def parts_country(sort):
 
 
 @app.route('/profile/<nickname>')
+@login_required
 def profile_page(nickname):
     reset_data()
 
@@ -105,7 +109,10 @@ def profile_page(nickname):
 
 
 @app.route('/edit/<nickname>',  methods=['GET', 'POST'])
+@login_required
 def edit_user(nickname):
+    if current_user.login != nickname:
+        abort(403)
     reset_data()
     form = EditUserForm()
     if request.method == "GET":
@@ -131,13 +138,15 @@ def edit_user(nickname):
             if session.query(User).filter(User.login == form.username.data).first():
                 return render_template('edit_user.html', form=form, user_err='Такой пользователь уже существует')
             dir_img = f'static/img/avatar/{form.username.data}'
-            if img.filename or form.delete_avatar.data:
-                rmtree(f'static/img/avatar/{user.login}')
-                os.makedirs(dir_img)
+            os.rename(f'static/img/avatar/{user.login}', dir_img)
+            user.login = form.username.data
+            old_dir = user.avatar.split('/')
+            user.avatar = f'../static/img/avatar/{form.username.data}/{old_dir[5]}'
         else:
-            dir_img = f'static/img/avatar/{user.login}'
+            dir_img = f'static/img/avatar/{form.username.data}'
             if img.filename or form.delete_avatar.data:
                 os.remove(user.avatar[3:])
+
         if img.filename or form.delete_avatar.data:
             if form.delete_avatar.data:
                 copy('static/img/avatar/default/default.jpg', f'{dir_img}/default.jpg')
@@ -147,12 +156,28 @@ def edit_user(nickname):
                 img.save(full_path_img)
             user.avatar = f'../{full_path_img}'
 
-        user.login = form.username.data
         session.commit()
 
         return redirect(f'../profile/{form.username.data}')
 
     return render_template('edit_user.html', form=form)
+
+
+@app.route('/delete/<nickname>',  methods=['GET', 'POST'])
+@login_required
+def delete_user(nickname):
+    if current_user.login != nickname:
+        abort(403)
+    reset_data()
+    form = DeleteUserForm()
+    if request.method == 'POST':
+        user = session.query(User).filter(User.login == nickname).first()
+        if not user.check_password(form.password.data):
+            return render_template('delete_delete.html', message='Неверный пароль', form=form)
+        session.delete(user)
+        session.commit()
+        return redirect('/')
+    return render_template('delete_user.html', form=form)
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -230,40 +255,6 @@ def quiz_survive_flag():
         return render_template('survive-result.html', win=info[1])
 
 
-def form_for_survive():
-    form = ButtonForm()
-    global score_quiz, win_score_quiz, progress_on_quiz, wrong_options, correct_options
-
-    if not bool(wrong_options):
-        search_options()
-
-    if request.method == 'POST':
-        answer = [name for name in request.form]
-        win = win_score_quiz
-        if answer[0] == 'correct_option':
-            win_score_quiz += 1
-        else:
-            return ['end', win]
-        if score_quiz >= 100:
-            win = win_score_quiz
-            reset_data()
-            if current_user.is_authenticated:
-                user = session.query(User).filter(User.login == current_user.login).first()
-                user.amount_quiz += 1
-                user.correct_answers += win
-                session.commit()
-
-    form.correct_option.label.text = correct_options[score_quiz].name
-    form.option2.label.text = wrong_options[score_quiz][0].name
-    form.option3.label.text = wrong_options[score_quiz][1].name
-    form.option4.label.text = wrong_options[score_quiz][2].name
-
-    # randint используется чтобы сделать рандомную последоватльность вывода кнопок
-    buttons = randint(1, 4)
-    score_quiz += 1
-    return ['run', form, correct_options[score_quiz - 1], buttons]
-
-
 def form_for_quizzes():
     form = ButtonForm()
     global score_quiz, win_score_quiz, progress_on_quiz, wrong_options, correct_options
@@ -294,8 +285,7 @@ def form_for_quizzes():
     form.option3.label.text = wrong_options[score_quiz][1].name
     form.option4.label.text = wrong_options[score_quiz][2].name
 
-
-    # randint используется чтобы сделать рандомную последоватльность вывода кнопок
+    # использую randint чтобы сделать рандомную последоватльность вывода кнопок(способа лучше не нашёл)
     buttons = randint(1, 4)
     score_quiz += 1
     return ['run', form, correct_options[score_quiz - 1], buttons]
@@ -380,6 +370,11 @@ def login_page():
 def log_out():
     logout_user()
     return redirect('/')
+
+
+@app.errorhandler(403)
+def authorization_required(error):
+    return render_template('403.html'), 403
 
 
 def reset_data():
