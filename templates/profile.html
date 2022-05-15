@@ -54,8 +54,13 @@
             </div></li>
     </ul>
 </div>
+{% if current_user.login == data.login %}
+    <div align="center" style="margin-top: 100px;">
+        <a href="/edit/{{data.login}}"><input type=submit value='Изменить настройки аккаунта' class="btn btn-success"></a>
+    </div>
 
-<div align="center" style="margin-top: 100px;">
-    <a href="/edit/{{data.login}}"><input type=submit value='Изменить настройки аккаунта' class="btn btn-success"></a>
-</div>
+    <div align="center" style="margin-top: 30px;">
+        <a href="/delete/{{data.login}}"><input type=submit value='Удалить свой аккаунт' class="btn btn-danger"></a>
+    </div>
+{% endif %}
 {% endblock %}
