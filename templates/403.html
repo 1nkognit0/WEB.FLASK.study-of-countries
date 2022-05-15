@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block title %} 401 {% endblock %}
+
+{% block content %}
+
+{% if not news %}
+<h1 class="mt-4 text-center">403</h1>
+<h1 class="h2 text-center"> Доступ запрещен </h1>
+{% endif %}
+
+{% endblock %}
