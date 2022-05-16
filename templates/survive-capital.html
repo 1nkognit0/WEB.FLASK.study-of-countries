@@ -1,13 +1,12 @@
 {% extends "base.html" %}
 
-{% block title %} Марафон "Флаги" {% endblock %}
+{% block title %} Марафон "Столицы" {% endblock %}
 
 {% block content %}
 <body>
-    <form method="post" action="/quizzes/survive-flag" novalidate enctype="multipart/form-data">
-        <center>
-            <img src="{{ correct.flag }}" height="450" style="margin-bottom: 30px; margin-top: 20px;">
-        </center>
+    <form method="post" action="/quizzes/survive-capital" novalidate enctype="multipart/form-data">
+        <div align="center">
+            <h1 class="display-2" style="margin-bottom: 50px;">{{ correct.capital }}</h1>
             <div>
                 {% if buttons == 1 %}
                     {{ form.correct_option(type="submit", class="btn btn-warning btn-lg btn-block") }}
@@ -34,6 +33,7 @@
                     {{ form.correct_option(type="submit", class="btn btn-warning btn-lg btn-block") }}
                 {% endif %}
             </div>
+        </div>
     </form>
 </body>
 {% endblock %}
