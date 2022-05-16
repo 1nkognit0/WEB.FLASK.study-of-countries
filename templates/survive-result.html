@@ -4,7 +4,11 @@
 
 {% block content %}
 <body>
-    <h3 align="center"><font color="green"> Вы ответили правильно на {{ win }} вопросов из 100 </font></h3>
+    {% if win == max_win %}
+        <h3 align="center" style="margin-top: 50px;"><font color="green"> Поздравляем! Вы пришли марафон </font></h3>
+    {% else %}
+        <h3 align="center" style="margin-top: 50px;"><font color="red"> Вы дошли до {{ win }} вопроса из {{ max_win }} </font></h3>
+    {% endif %}
     <div align="center">
         <br>
         <br>
