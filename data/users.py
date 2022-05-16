@@ -15,7 +15,9 @@ class User(SqlAlchemyBase, UserMixin):
     description = sqlalchemy.Column(sqlalchemy.String, nullable=True, default='Нет описания')
     avatar = sqlalchemy.Column(sqlalchemy.String, nullable=True)
     amount_quiz = sqlalchemy.Column(sqlalchemy.Integer, nullable=True, default=0)
-    correct_answers = sqlalchemy.Column(sqlalchemy.Integer, nullable=True, default=0)
+    correct_answers_quiz = sqlalchemy.Column(sqlalchemy.Integer, nullable=True, default=0)
+    correct_answers_marathon = sqlalchemy.Column(sqlalchemy.Integer, nullable=True, default=0)
+    amount_marathon = sqlalchemy.Column(sqlalchemy.Integer, nullable=True, default=0)
 
     def set_password(self, password):
         self.hashed_password = generate_password_hash(password)
