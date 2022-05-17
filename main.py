@@ -254,7 +254,7 @@ def quiz_survive_flag():
     else:
         return render_template('survive-result.html', win=info[1], max_win=len(correct_options))
 
-
+      
 def form_for_quizzes():
     form = ButtonForm()
     global score_quiz, win_score_quiz, progress_on_quiz, wrong_options, correct_options
@@ -284,6 +284,42 @@ def form_for_quizzes():
     form.option2.label.text = wrong_options[score_quiz][0].name
     form.option3.label.text = wrong_options[score_quiz][1].name
     form.option4.label.text = wrong_options[score_quiz][2].name
+
+    # randint используется чтобы сделать рандомную последоватльность вывода кнопок
+    buttons = randint(1, 4)
+    score_quiz += 1
+    return ['run', form, correct_options[score_quiz - 1], buttons]
+
+  
+def form_for_governments():
+    form = ButtonForm()
+    global score_quiz, win_score_quiz, progress_on_quiz, wrong_options, correct_options
+
+    if not bool(wrong_options):
+        search_options()
+
+    if request.method == 'POST':
+        answer = [name for name in request.form]
+        if answer[0] == 'correct_option':
+            win_score_quiz += 1
+            progress_on_quiz[score_quiz - 1] = 'green'
+        else:
+            progress_on_quiz[score_quiz - 1] = 'red'
+        if score_quiz >= 10:
+            win = win_score_quiz
+            reset_data()
+            if current_user.is_authenticated:
+                user = session.query(User).filter(User.login == current_user.login).first()
+                user.amount_quiz += 1
+                user.correct_answers += win
+                session.commit()
+
+            return ['end', win]
+
+    form.correct_option.label.text = correct_options[score_quiz].form_government
+    form.option2.label.text = wrong_options[score_quiz][0].form_government
+    form.option3.label.text = wrong_options[score_quiz][1].form_government
+    form.option4.label.text = wrong_options[score_quiz][2].form_government
 
     # randint используется чтобы сделать рандомную последоватльность вывода кнопок
     buttons = randint(1, 4)
