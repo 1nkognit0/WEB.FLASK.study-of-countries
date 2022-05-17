@@ -17,7 +17,7 @@
 
     <form method="post" action="/quizzes/government" novalidate enctype="multipart/form-data">
         <div align="center">
-            <h1 class="display-2" style="margin-bottom: 50px;">{{ correct.form_government }}</h1>
+            <h1 class="display-2" style="margin-bottom: 50px;">{{ correct.name }}</h1>
             <div>
                 {% if buttons == 1 %}
                     {{ form.correct_option(type="submit", class="btn btn-warning btn-lg btn-block") }}
