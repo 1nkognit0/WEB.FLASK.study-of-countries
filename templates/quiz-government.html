@@ -1,0 +1,50 @@
+{% extends "base.html" %}
+
+{% block title %} Форма правления {% endblock %}
+
+{% block content %}
+<body>
+
+    <br>
+
+    <div align="center">
+        {% for color in progress %}
+            <hr  color={{color}} width="70px" style="display: inline-block; height: 5px;">
+        {% endfor %}
+    </div>
+
+    <br>
+
+    <form method="post" action="/quizzes/government" novalidate enctype="multipart/form-data">
+        <div align="center">
+            <h1 class="display-2" style="margin-bottom: 50px;">{{ correct.name }}</h1>
+            <div>
+                {% if buttons == 1 %}
+                    {{ form.correct_option(type="submit", class="btn btn-warning btn-lg btn-block") }}
+                    {{ form.option2(type="submit", class="btn btn-warning btn-lg btn-block") }}
+                    {{ form.option3(type="submit", class="btn btn-warning btn-lg btn-block") }}
+                    {{ form.option4(type="submit", class="btn btn-warning btn-lg btn-block") }}
+                {% endif %}
+                {% if buttons == 2 %}
+                    {{ form.option2(type="submit", class="btn btn-warning btn-lg btn-block") }}
+                    {{ form.correct_option(type="submit", class="btn btn-warning btn-lg btn-block") }}
+                    {{ form.option3(type="submit", class="btn btn-warning btn-lg btn-block") }}
+                    {{ form.option4(type="submit", class="btn btn-warning btn-lg btn-block") }}
+                {% endif %}
+                {% if buttons == 3 %}
+                    {{ form.option2(type="submit", class="btn btn-warning btn-lg btn-block") }}
+                    {{ form.option3(type="submit", class="btn btn-warning btn-lg btn-block") }}
+                    {{ form.correct_option(type="submit", class="btn btn-warning btn-lg btn-block") }}
+                    {{ form.option4(type="submit", class="btn btn-warning btn-lg btn-block") }}
+                {% endif %}
+                {% if buttons == 4 %}
+                    {{ form.option2(type="submit", class="btn btn-warning btn-lg btn-block") }}
+                    {{ form.option3(type="submit", class="btn btn-warning btn-lg btn-block") }}
+                    {{ form.option4(type="submit", class="btn btn-warning btn-lg btn-block") }}
+                    {{ form.correct_option(type="submit", class="btn btn-warning btn-lg btn-block") }}
+                {% endif %}
+            </div>
+        </div>
+    </form>
+</body>
+{% endblock %}
