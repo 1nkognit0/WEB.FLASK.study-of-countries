@@ -35,6 +35,7 @@ PARTS_OF_WORLD = ['Все', 'Африка', 'Северная Америка', '
 select_option = 'Все'
 wrong_options = []
 correct_options = []
+current_test = ''
 
 FORM_GOVERNMENT = ['Конституционная монархия', 'Парламентская республика', 'Президентская республика',
                    'Смешанная республика', 'Абсолютная монархия', 'Социалистическая республика', 'Исламская республика']
@@ -59,7 +60,6 @@ def database_return():
 @app.route('/leaderboard')
 @login_required
 def leaderboard():
-    reset_data()
     users = session.query(User.login, User.amount_quiz, User.correct_answers_quiz).all()
 
     sorted_users = [user for user in users if user[1] != 0]
@@ -197,7 +197,6 @@ def main_page():
 @app.route('/quizzes', methods=['GET', 'POST'])
 def quizzes():
     reset_data()
-
     global select_option
 
     if request.method == 'POST':
@@ -207,6 +206,9 @@ def quizzes():
 
 @app.route('/quizzes/capital', methods=['GET', 'POST'])
 def quiz_capitals():
+    global current_test
+    current_test = 'capitals'
+
     info = form_for_quizzes()
     if info[0] == 'run':
         return render_template('quiz-capital.html',
@@ -217,6 +219,9 @@ def quiz_capitals():
 
 @app.route('/quizzes/government', methods=['GET', 'POST'])
 def quiz_governments():
+    global current_test
+    current_test = 'governments'
+
     info = form_for_quizzes()
     if info[0] == 'run':
         return render_template('quiz-government.html',
@@ -227,6 +232,9 @@ def quiz_governments():
 
 @app.route('/quizzes/flag', methods=['GET', 'POST'])
 def quiz_flags():
+    global current_test
+    current_test = 'flags'
+
     info = form_for_quizzes()
     if info[0] == 'run':
         return render_template('quiz-flag.html',
@@ -237,6 +245,9 @@ def quiz_flags():
 
 @app.route('/quizzes/survive-capital', methods=['GET', 'POST'])
 def quiz_survive_capitals():
+    global current_test
+    current_test = 'marathon-capitals'
+
     info = form_for_marathon()
     if info[0] == 'run':
         return render_template('survive-capital.html',
@@ -247,14 +258,17 @@ def quiz_survive_capitals():
 
 @app.route('/quizzes/survive-flag', methods=['GET', 'POST'])
 def quiz_survive_flag():
+    global current_test
+    current_test = 'marathon-flags'
+
     info = form_for_marathon()
     if info[0] == 'run':
         return render_template('survive-flag.html',
                                form=info[1], correct=info[2], buttons=info[3], progress=progress_on_quiz)
     else:
-        return render_template('survive-result.html', win=info[1], max_win=len(correct_options))
+        return render_template('survive-result.html', win=info[1], max_win=info[2])
 
-      
+
 def form_for_quizzes():
     form = ButtonForm()
     global score_quiz, win_score_quiz, progress_on_quiz, wrong_options, correct_options
@@ -280,46 +294,27 @@ def form_for_quizzes():
 
             return ['end', win]
 
-    form.correct_option.label.text = correct_options[score_quiz].name
-    form.option2.label.text = wrong_options[score_quiz][0].name
-    form.option3.label.text = wrong_options[score_quiz][1].name
-    form.option4.label.text = wrong_options[score_quiz][2].name
+    if current_test == 'governments':
+        form.correct_option.label.text = correct_options[score_quiz].form_government
+        possible_opt = choice(FORM_GOVERNMENT)
+        while form.correct_option.label.text == possible_opt:
+            possible_opt = choice(FORM_GOVERNMENT)
+        form.option2.label.text = possible_opt
+        possible_opt = choice(FORM_GOVERNMENT)
+        while form.correct_option.label.text == possible_opt or form.option2.label.text == possible_opt:
+            possible_opt = choice(FORM_GOVERNMENT)
+        form.option3.label.text = possible_opt
+        possible_opt = choice(FORM_GOVERNMENT)
+        while form.correct_option.label.text == possible_opt or form.option2.label.text == possible_opt or \
+                form.option3.label.text == possible_opt:
+            possible_opt = choice(FORM_GOVERNMENT)
+        form.option4.label.text = possible_opt
 
-    # randint используется чтобы сделать рандомную последоватльность вывода кнопок
-    buttons = randint(1, 4)
-    score_quiz += 1
-    return ['run', form, correct_options[score_quiz - 1], buttons]
-
-  
-def form_for_governments():
-    form = ButtonForm()
-    global score_quiz, win_score_quiz, progress_on_quiz, wrong_options, correct_options
-
-    if not bool(wrong_options):
-        search_options()
-
-    if request.method == 'POST':
-        answer = [name for name in request.form]
-        if answer[0] == 'correct_option':
-            win_score_quiz += 1
-            progress_on_quiz[score_quiz - 1] = 'green'
-        else:
-            progress_on_quiz[score_quiz - 1] = 'red'
-        if score_quiz >= 10:
-            win = win_score_quiz
-            reset_data()
-            if current_user.is_authenticated:
-                user = session.query(User).filter(User.login == current_user.login).first()
-                user.amount_quiz += 1
-                user.correct_answers += win
-                session.commit()
-
-            return ['end', win]
-
-    form.correct_option.label.text = correct_options[score_quiz].form_government
-    form.option2.label.text = wrong_options[score_quiz][0].form_government
-    form.option3.label.text = wrong_options[score_quiz][1].form_government
-    form.option4.label.text = wrong_options[score_quiz][2].form_government
+    else:
+        form.correct_option.label.text = correct_options[score_quiz].name
+        form.option2.label.text = wrong_options[score_quiz][0].name
+        form.option3.label.text = wrong_options[score_quiz][1].name
+        form.option4.label.text = wrong_options[score_quiz][2].name
 
     # randint используется чтобы сделать рандомную последоватльность вывода кнопок
     buttons = randint(1, 4)
@@ -331,16 +326,17 @@ def form_for_marathon():
     form = ButtonForm()
     global score_quiz, win_score_quiz, progress_on_quiz, wrong_options, correct_options
 
-    if not bool(wrong_options):
+    if not bool(correct_options):
         search_options_for_marathon()
 
     if request.method == 'POST':
         answer = [name for name in request.form]
         win = win_score_quiz
+        max_win = len(correct_options)
         if answer[0] == 'correct_option':
             win_score_quiz += 1
         else:
-            return ['end', win]
+            return ['end', win, max_win]
         if score_quiz >= len(correct_options):
             win = win_score_quiz
             reset_data()
@@ -350,7 +346,7 @@ def form_for_marathon():
                 user.correct_answers_marathon += win
                 session.commit()
 
-            return ['end', win]
+            return ['end', win, max_win]
 
     form.correct_option.label.text = correct_options[score_quiz].name
     form.option2.label.text = wrong_options[score_quiz][0].name
@@ -446,7 +442,6 @@ def load_user(user_id):
 
 @app.route('/login', methods=['GET', 'POST'])
 def login_page():
-    reset_data()
     form = LoginForm()
     if form.validate_on_submit():
         user = session.query(User).filter(User.login == form.username.data).first()
