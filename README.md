@@ -1,2 +1,2 @@
 # WEB.study-of-countries
-RESTful Web-сервис на Flask с реляционный БД
+Проект на Flask с реляционной БД
